@@ -1,0 +1,38 @@
+# Keil 构建产物
+*.o
+*.d
+*.crf
+*.axf
+*.bin
+*.hex
+*.htm
+*.lnp
+*.map
+*.dep
+*.iex
+*.lst
+Objects/
+Listings/
+RTE/
+
+# Keil 用户级文件（每台机器的窗口布局/断点，不该进库）
+*.uvguix.*
+*.uvgui.*
+*.uvoptx
+*.uvopt
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+# 忽略重构清单与操作手册
+重构清单与Git操作手册.md
+
+
+.claude/  
+.cursor/
+.spec-workflow/
+.trellis/
+AGENTS.md

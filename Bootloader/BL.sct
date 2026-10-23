@@ -1,0 +1,33 @@
+; Bootloader 分散加载文件
+; FLASH 整片: 0x08000000 - 0x0807FFFF (512KB)
+; BOOT 区   : 0x08000000 - 0x0800FFFF (64KB)   <- 本工程只许用到这里
+;
+; 参数区在 0x08010000。LR_IROM1 长度写死 0x10000，
+; Bootloader 一旦长胖超过 64KB，链接器直接报错 —— 这是硬保护，
+; 比"记得别写太多"可靠。
+
+LR_IROM1 0x08000000 0x00010000  {
+  ER_IROM1 0x08000000 0x00010000  {
+   *.o (RESET, +First)
+   *(InRoot$$Sections)
+   .ANY (+RO)
+   .ANY (+XO)
+  }
+
+  ; RW/ZI 放主 SRAM 低段。上限给 0x2F000(188KB) 而不是整块 192KB，
+  ; 是为了把最高 4KB 让给下面的 ER_IRAM_FUNC，两块不重叠。
+  RW_IRAM1 0x20000000 0x0002F000  {
+   .ANY (+RW +ZI)
+  }
+
+  ; 擦写 Flash 的代码要在 RAM 里执行：Flash 控制器忙的时候，
+  ; CPU 从 Flash 取指会被总线 stall 住；放 RAM 就没这个问题，
+  ; 调试时在这类函数上打断点也不会跟 Flash 控制器抢时序。
+  ;
+  ; gd32f4xx_fmc.o 整个搬过来 —— 真正干活的 fmc_page_erase /
+  ; fmc_word_program 在库里，只搬自己的 fmc.o 没有用。
+  ER_IRAM_FUNC +0  {
+   *.o (.ramfunc)
+   gd32f4xx_fmc.o (+RO)
+  }
+}

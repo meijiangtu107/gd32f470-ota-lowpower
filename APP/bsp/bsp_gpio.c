@@ -1,0 +1,143 @@
+/* GPIO 统一配置入口与引脚表定义 */
+
+#include "bsp_gpio.h"
+#include <stddef.h>
+#include "gd32f4xx.h"
+
+/* 引脚表：全工程引脚定义的唯一来源 */
+
+const bsp_pin_t BSP_PIN_LED[BSP_LED_COUNT] = {
+    { GPIOD, RCU_GPIOD, GPIO_PIN_10, 0U, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },
+    { GPIOD, RCU_GPIOD, GPIO_PIN_11, 0U, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },
+    { GPIOD, RCU_GPIOD, GPIO_PIN_12, 0U, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },
+    { GPIOD, RCU_GPIOD, GPIO_PIN_13, 0U, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },
+    { GPIOD, RCU_GPIOD, GPIO_PIN_14, 0U, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },
+    { GPIOD, RCU_GPIOD, GPIO_PIN_15, 0U, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ }
+};
+
+/* 上拉输入：未按下为高，按下为低；输入模式下 otype/ospeed 无效，填值仅为表结构统一 */
+const bsp_pin_t BSP_PIN_KEY[BSP_KEY_COUNT] = {
+    { GPIOE, RCU_GPIOE, GPIO_PIN_15, 0U, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },  /* KEY1 */
+    { GPIOE, RCU_GPIOE, GPIO_PIN_6,  0U, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },  /* KEY2 */
+    { GPIOE, RCU_GPIOE, GPIO_PIN_11, 0U, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },  /* KEY3 */
+    { GPIOE, RCU_GPIOE, GPIO_PIN_4,  0U, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },  /* KEY4 */
+    { GPIOE, RCU_GPIOE, GPIO_PIN_7,  0U, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ },  /* KEY5 */
+    { GPIOB, RCU_GPIOB, GPIO_PIN_0,  0U, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ }   /* KEY6 */
+};
+
+/* 低功耗唤醒键 PA0：上拉输入，按下接地；深睡时保持数字输入以支持 EXTI */
+const bsp_pin_t BSP_PIN_WAKEUP_KEY = {
+    GPIOA, RCU_GPIOA, GPIO_PIN_0, 0U, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_UART0_TX = {
+    GPIOA, RCU_GPIOA, GPIO_PIN_9,  GPIO_AF_7, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_UART0_RX = {
+    GPIOA, RCU_GPIOA, GPIO_PIN_10, GPIO_AF_7, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_UART1_TX = {
+    GPIOD, RCU_GPIOD, GPIO_PIN_5, GPIO_AF_7, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_UART1_RX = {
+    GPIOD, RCU_GPIOD, GPIO_PIN_6, GPIO_AF_7, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+/* RS485 收发方向。普通推挽输出，初始低电平 = 接收模式 */
+const bsp_pin_t BSP_PIN_RS485_DE = {
+    GPIOE, RCU_GPIOE, GPIO_PIN_8, 0U, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+/* SPI0（GD25Qxx Flash）：PB3/PB4 默认为 JTDO/NJTRST，PA15 为 JTDI；仅用 SWD 时可作 GPIO/AF */
+const bsp_pin_t BSP_PIN_SPI0_SCK = {
+    GPIOB, RCU_GPIOB, GPIO_PIN_3, GPIO_AF_5, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_SPI0_MISO = {
+    GPIOB, RCU_GPIOB, GPIO_PIN_4, GPIO_AF_5, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_SPI0_MOSI = {
+    GPIOB, RCU_GPIOB, GPIO_PIN_5, GPIO_AF_5, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+/* 片选：普通推挽输出，空闲时拉高 */
+const bsp_pin_t BSP_PIN_SPI0_CS = {
+    GPIOA, RCU_GPIOA, GPIO_PIN_15, 0U, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+/* SPI3（GD30AD3344） */
+const bsp_pin_t BSP_PIN_SPI3_SCK = {
+    GPIOE, RCU_GPIOE, GPIO_PIN_12, GPIO_AF_5, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_SPI3_MISO = {
+    GPIOE, RCU_GPIOE, GPIO_PIN_13, GPIO_AF_5, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_SPI3_MOSI = {
+    GPIOE, RCU_GPIOE, GPIO_PIN_14, GPIO_AF_5, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+/* 片选：普通推挽输出，空闲时拉高 */
+const bsp_pin_t BSP_PIN_SPI3_CS = {
+    GPIOE, RCU_GPIOE, GPIO_PIN_10, 0U, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+/* I2C0（OLED）：PB8=SCL，PB9=SDA；开漏输出 + 内部上拉，推挽会导致总线争用 */
+const bsp_pin_t BSP_PIN_I2C0_SCL = {
+    GPIOB, RCU_GPIOB, GPIO_PIN_8, GPIO_AF_4, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_I2C0_SDA = {
+    GPIOB, RCU_GPIOB, GPIO_PIN_9, GPIO_AF_4, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ
+};
+
+/* ADC0 模拟输入：PC0=CH10，PC1=CH11；af=0，otype/ospeed 无效 */
+const bsp_pin_t BSP_PIN_ADC_CH0 = {
+    GPIOC, RCU_GPIOC, GPIO_PIN_0, 0U, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+const bsp_pin_t BSP_PIN_ADC_CH1 = {
+    GPIOC, RCU_GPIOC, GPIO_PIN_1, 0U, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+
+/* DAC0_OUT0=PA4：模拟输出，af=0；PA4 跳线到 PC1 做回读 */
+const bsp_pin_t BSP_PIN_DAC_OUT = {
+    GPIOA, RCU_GPIOA, GPIO_PIN_4, 0U, GPIO_MODE_ANALOG, GPIO_PUPD_NONE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ
+};
+/* 配置函数 */
+
+void bsp_gpio_config(const bsp_pin_t *pin)
+{
+    if (pin == NULL) {
+        return;
+    }
+
+    /* 开时钟；同一端口重复调用只会置位，无副作用 */
+    rcu_periph_clock_enable(pin->rcu);
+
+    /* af=0 表示不使用复用功能（普通输入/输出），跳过 */
+    if (pin->af != 0U) {
+        gpio_af_set(pin->port, pin->af, pin->pin);
+    }
+
+    gpio_mode_set(pin->port, pin->mode, pin->pupd, pin->pin);
+    gpio_output_options_set(pin->port, (uint8_t)pin->otype, pin->ospeed, pin->pin);
+}
+
+void bsp_gpio_config_array(const bsp_pin_t *arr, uint32_t count)
+{
+    uint32_t i;
+
+    if (arr == NULL) {
+        return;
+    }
+
+    for (i = 0U; i < count; i++) {
+        bsp_gpio_config(&arr[i]);
+    }
+}
