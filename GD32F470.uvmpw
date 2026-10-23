@@ -5,7 +5,7 @@
 
   <Header>### uVision Project, (C) Keil Software</Header>
 
-  <WorkspaceName>C:\Users\Lenovo\Desktop\ximenzi\GD32F470.uvmpw</WorkspaceName>
+  <WorkspaceName>.GD32F470.uvmpw</WorkspaceName>
 
   <project>
     <PathAndName>.\APP\APP.uvprojx</PathAndName>
