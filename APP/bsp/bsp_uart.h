@@ -1,11 +1,5 @@
-/**
- * @file    bsp_uart.h
- * @brief   串口：USART0 调试口 + USART1 RS485
- * @author  meijiangtu
- * @date    2026-09-16
- * @note    接收走 DMA + 空闲中断，数据进 ringbuf；
- *          发送走轮询，RS485 那路带软件方向控制。
- */
+/* 串口对外接口：USART0 调试口 + USART1 RS485。
+ * 接收走 DMA + 空闲中断，数据进 ringbuf；发送走轮询，RS485 那路带软件方向控制。 */
 
 #ifndef BSP_UART_H
 #define BSP_UART_H

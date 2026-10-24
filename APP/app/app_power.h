@@ -1,4 +1,4 @@
-/* 低功耗：唤醒后按顺序重建外设的接口 */
+/* 低功耗应用层接口：RS485 波特率换算与唤醒后的外设重建回调 */
 
 #ifndef APP_POWER_H
 #define APP_POWER_H

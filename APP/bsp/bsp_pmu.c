@@ -1,20 +1,11 @@
-/**
- * @file    bsp_pmu.c
- * @brief   低功耗：Deep-sleep 进出 + 唤醒恢复
- * @author  meijiangtu
- * @date    2026-10-22
+/*
+ * 低功耗：Deep-sleep 进出 + 唤醒恢复。
  *
- * 【进入睡眠前为什么要一路降频】
- * GD 官方例程 Examples/PMU/Deepsleep_wakeup_RTC 在 __WFI() 之前做了
- * AHB /2 → /4 → /8 → /16 → 切 IRC16M 的逐级降频，注释原文：
- *
- *   "software delay to prevent the impact of Vcore fluctuations.
- *    It is strongly recommended to include it to avoid issues caused
- *    by self-removal."
- *
- * 翻译：240MHz 直接掉进低功耗 LDO 的 deep-sleep，内核电压会抖，
- * 可能自己把自己搞死。逐级降频是为了让电压平稳过渡。
- *
+ * 【睡前为什么要逐级降频】
+ * 240MHz 直接掉进低功耗 LDO 的 deep-sleep，内核电压会抖，可能自己
+ * 把自己搞死。所以进 __WFI() 前按 AHB /2 → /4 → /8 → /16 → 切 IRC16M
+ * 逐级降频，每级之间留延时让 Vcore 平稳过渡（GD 官方例程
+ * Deepsleep_wakeup_RTC 同样这么做，并强烈建议保留这些延时）。
  * 代价：降频之后串口波特率全乱，所以所有串口发送必须在降频之前完成。
  *
  * 【醒来后为什么要 SystemInit() + 立刻改 VTOR】

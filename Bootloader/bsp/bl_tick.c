@@ -1,4 +1,4 @@
-/* Bootloader 时基：SysTick 毫秒计数。 */
+/* SysTick 时基：1ms 心跳，优先级 0。BL 内所有超时与延时都取自这里。 */
 
 #include "gd32f4xx.h"
 #include "bl_tick.h"

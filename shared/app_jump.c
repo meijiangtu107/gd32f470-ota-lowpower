@@ -1,6 +1,7 @@
-/* Bootloader 跳转到 APP：校验向量表后，关中断、停 SysTick、清 NVIC、
- * 设置 VTOR，再换栈跳转。
- * 校验项：VTOR 128 字节对齐、MSP 8 字节对齐且在 SRAM、Reset_Handler 在槽内且 Thumb 位为 1。 */
+/* 跳转进 APP 的最后一跳：向量表校验通过后关中断、停 SysTick、清 NVIC、
+ * 设 VTOR，再换栈跳转。
+ * 判据：基址 128 字节对齐（VTOR 要求）、MSP 8 字节对齐且在 SRAM、
+ * Reset_Handler 在槽内且 Thumb 位为 1。 */
 
 #include "gd32f4xx.h"
 #include "app_jump.h"
@@ -45,7 +46,7 @@ static int vector_ok(uint32_t msp, uint32_t reset, uint32_t slot_base)
         return 0;
     }
 
-    /* ③ Thumb 位。Cortex-M 只跑 Thumb，函数地址 bit0 恒为 1 */
+    /* Thumb 位。Cortex-M 只跑 Thumb，函数地址 bit0 恒为 1 */
     if ((reset & 1UL) == 0UL) {
         return 0;
     }

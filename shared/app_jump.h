@@ -1,6 +1,6 @@
-/* Bootloader 跳转到 APP 的公共接口，APP 与 BL 共用。
- * app_jump() 只负责 CPU 侧（关中断、停 SysTick、清 NVIC、设 VTOR/MSP），
- * 外设由调用者负责关闭。 */
+/* 跳转 APP 的公共接口，BL 与 APP 共用。
+ * app_jump() 只管 CPU 侧（关中断、停 SysTick、清 NVIC、设 VTOR/MSP），
+ * 已开的外设由调用方自己关。 */
 
 #ifndef SHARED_APP_JUMP_H
 #define SHARED_APP_JUMP_H

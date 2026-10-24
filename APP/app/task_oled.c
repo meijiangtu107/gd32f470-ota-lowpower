@@ -1,4 +1,5 @@
-/* OLED 显示任务：把字符串/数字排版成字库点阵，再调 drv_oled 写入显存 */
+/* OLED 显示：本地维护一份显存镜像，按 8x16 字库排版字符串，
+ * 刷新时整屏交给 drv_oled。 */
 
 #include "tasks.h"
 #include "drv_oled.h"

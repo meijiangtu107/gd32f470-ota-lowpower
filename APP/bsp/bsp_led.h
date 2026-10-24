@@ -1,8 +1,5 @@
-/**
- * @file    bsp_led.h
- * @brief   LED 控制（PD10~PD15 = LED1~LED6）
- * @author  meijiangtu
- * @date    2026-09-16
+/*
+ * LED 接口：LED1~LED6 对应 PD10~PD15，高电平点亮。
  */
 
 #ifndef BSP_LED_H

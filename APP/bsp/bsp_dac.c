@@ -1,4 +1,4 @@
-/* DAC0_OUT0（PA4）：软件写的模拟量输出 */
+/* DAC0_OUT0 -> PA4：不配触发源、直写数据保持寄存器的模拟量输出 */
 
 #include "bsp_dac.h"
 #include "bsp_pinmap.h"

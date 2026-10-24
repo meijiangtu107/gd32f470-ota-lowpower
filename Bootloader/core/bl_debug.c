@@ -1,4 +1,5 @@
-/* Bootloader 调试命令窗口：用串口构造各种启动状态。每条命令改完参数后落盘，保持 CRC 正确。 */
+/* 启动早期的串口命令窗口：用来人工构造各种启动状态。
+ * 每条命令改完参数即落盘，CRC 始终保持合法。 */
 
 #include "bl_debug.h"
 
@@ -54,7 +55,7 @@ static void bl_debug_commit_and_reset(void)
     bl_uart_printf(BL_LOG_USART, "saved. resetting...\r\n");
     bl_delay_ms(50UL);
 
-    /* 复位让状态机从第 1 步重新判断，测的是真实启动路径。 */
+    /* 落盘后复位走真实启动路径，不在窗口里就地模拟。 */
     NVIC_SystemReset();
     for (;;) {
     }

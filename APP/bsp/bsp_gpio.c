@@ -1,4 +1,4 @@
-/* GPIO 统一配置入口与引脚表定义 */
+/* 全工程引脚描述符表（bsp_pin_t）+ 统一配置函数，引脚定义只出现在这里 */
 
 #include "bsp_gpio.h"
 #include <stddef.h>

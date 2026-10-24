@@ -1,5 +1,5 @@
-/* Bootloader 串口：轮询收发，无 DMA、无中断。
- * OTA 使用哪条串口由 BL_OTA_UART 决定，两条口都会初始化。 */
+/* 串口轮询驱动（无中断、无 DMA），115200-8-N-1。
+ * OTA 走哪条口由 BL_OTA_UART 决定，调试口固定 USART0，两路都会初始化。 */
 
 #ifndef BL_UART_H
 #define BL_UART_H

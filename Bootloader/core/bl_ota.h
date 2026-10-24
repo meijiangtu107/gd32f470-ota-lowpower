@@ -1,5 +1,5 @@
-/* Bootloader 侧 OTA 接收接口：从串口收整个升级包到 RAM。
- * 包格式见 shared/ota_pack.h。 */
+/* OTA 接收接口：把整个升级包从串口收进 RAM 并整包校验。
+ * 16 字节头的布局见 shared/ota_pack.h。 */
 
 #ifndef BL_OTA_H
 #define BL_OTA_H

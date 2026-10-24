@@ -1,4 +1,5 @@
-/* APP 主程序：初始化外设和业务模块，然后运行调度器 */
+/* 上电流程：VTOR 指向本槽 -> 基础外设 -> 参数页/RTC -> 各功能外设 -> 业务层 -> 调度器。
+ * 初始化顺序有依赖：参数页先于 USART1，RTC 先于 app_cmd，ADC 校准先于 TIMER1 启动。 */
 
 #include "gd32f4xx.h"
 #include "bsp_tick.h"

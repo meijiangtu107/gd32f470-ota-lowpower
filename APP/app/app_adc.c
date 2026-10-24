@@ -1,4 +1,5 @@
-/* 三通道业务量：CH0/CH1 板载 ADC，CH2 外部 ADC(PT100) */
+/* 三通道业务量的维护与访问：CH0/CH1 读板载 ADC 快照后乘变比，
+ * CH2 走 AD3344 电压到 PT100 温度的换算链（线性校准 + 点校准 + 查表插值）。 */
 
 #include <math.h>
 #include <string.h>

@@ -1,10 +1,6 @@
-/**
- * @file    bsp_key.h
- * @brief   按键扫描与消抖
- * @author  meijiangtu
- * @date    2026-09-16
- * @note    没有专门的消抖延时，靠"每 10ms 才看一次"实现消抖。
- *          所以 bsp_key_scan() 必须由任务按固定周期调用，不能乱调。
+/*
+ * 按键扫描接口。消抖没有专门的延时，靠"每 10ms 才看一次"实现，
+ * 因此 bsp_key_scan() 必须由任务按固定周期调用，不能乱调。
  */
 
 #ifndef BSP_KEY_H

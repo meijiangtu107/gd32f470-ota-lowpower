@@ -1,11 +1,5 @@
-/**
- * @file    bsp_spi.h
- * @brief   SPI 总线：初始化 + 收发
- * @author  meijiangtu
- * @date    2026-09-16
- * @note    只做字节收发。片选（CS）由调用方（drv_ 层）控制 ——
- *          不同器件的 CS 时序不一样，总线层不该管。
- */
+/* SPI 总线对外接口。只做字节收发；片选（CS）由调用方（drv_ 层）控制 ——
+ * 不同器件的 CS 时序不一样，总线层不该管。 */
 
 #ifndef BSP_SPI_H
 #define BSP_SPI_H

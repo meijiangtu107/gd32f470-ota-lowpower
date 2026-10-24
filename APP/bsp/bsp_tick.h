@@ -1,9 +1,5 @@
-/**
- * @file    bsp_tick.h
- * @brief   SysTick 时基：毫秒计数 + 微秒延时
- * @author  meijiangtu
- * @date    2026-09-16
- */
+/* SysTick 时基：毫秒计数 + 微秒延时（DWT 实现）。
+ * 毫秒计数约 49.7 天回绕一次，超时判断必须用无符号减法比较。 */
 
 #ifndef BSP_TICK_H
 #define BSP_TICK_H

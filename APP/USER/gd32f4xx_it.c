@@ -1,4 +1,6 @@
-/* 中断服务函数：统一转发到各 bsp 模块 */
+/* 中断向量表的服务函数全部集中在此，函数体只做一次转发；
+ * 覆盖 SysTick(1ms)、USART0/USART1、DMA1_CH4(ADC 序列搬完)、
+ * RTC 唤醒定时器(EXTI22) 和 PA0 唤醒键(EXTI0)。 */
 
 #include "gd32f4xx.h"
 #include "bsp_tick.h"

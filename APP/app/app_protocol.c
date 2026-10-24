@@ -108,7 +108,7 @@ int app_protocol_feed(uint8_t ch)
     uint8_t nib;
     uint8_t byte;
 
-    /* ---- 第 1 阶段：找帧头 "A5B6" ---- */
+    /* ---- 同步帧头 "A5B6" ---- */
     if (s_hunt < 4U) {
         if (ch == head[s_hunt]) {
             s_hunt++;
@@ -125,7 +125,7 @@ int app_protocol_feed(uint8_t ch)
         return 0;
     }
 
-    /* ---- 第 2 阶段：十六进制解码 ---- */
+    /* ---- 帧头锁定后做十六进制解码 ---- */
     nib = ap_hex_to_nibble(ch);
     if (nib > 0x0FU) {
         /* 非十六进制字符：本帧作废；若当前是 'A' 则作为新帧头起点 */

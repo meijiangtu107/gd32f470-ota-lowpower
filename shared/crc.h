@@ -1,4 +1,4 @@
-/* CRC-32/ISO-HDLC（反射多项式 0xEDB88320），用于参数块完整性与 OTA 整包校验。 */
+/* CRC32（ISO-HDLC 变体，反射多项式 0xEDB88320）：参数块与 OTA 包共用的完整性校验。 */
 
 #ifndef SHARED_CRC_H
 #define SHARED_CRC_H

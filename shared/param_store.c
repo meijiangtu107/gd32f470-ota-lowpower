@@ -1,18 +1,15 @@
-/**
- * @file    param_store.c
- * @brief   参数存储：整页读-改-写 + 主备双副本
- * @author  meijiangtu
- * @date    2026-10-10
+/*
+ * 参数存储：整页读-改-写 + 主备双副本。
  *
  * 【双副本到底能抗什么】
  * 主块(+0x000) 和 备份块(+0x100) 在同一个 4KB 页里，写的时候两份写同一份值
- * （镜像语义，与旧 Bootloader 的 bl_commit_param_page() 一致）。
+ * （镜像语义）。
  *
  * 能抗：写入过程中某字节失败、位翻转、某一份被写坏 -> 另一份还能用。
  * 不能抗：擦除那一瞬间断电 —— 一次 fmc_page_erase 把两份一起抹掉，
  *         此刻掉电就只能落默认值。
  * 想连擦除窗口一起抗住，得让主备各占一页交替写（8KB）。参数页只有 4KB，
- * 做不到，Step 10 如果在意再单独讨论。
+ * 做不到，除非给参数区扩容，这里按现状取舍。
  *
  * 【本文件在 shared/ 里】APP 和 Bootloader 都要读写参数页（BL 要动
  * boot_slot / boot_trials / update_flag），所以这份逻辑必须两边共用一份，
@@ -106,7 +103,7 @@ static int param_migrate_v2_to_v3(app_param_t *p)
     p->boot_confirm = PARAM_BOOT_CONFIRM_MAGIC;
     p->boot_trials  = 0UL;
 
-    /* 旧的 PENDING 指向的是旧链路的暂存区，语义已经不一样了，不能沿用 */
+    /* v2 的 PENDING 对应的暂存区与现在的 Download 区语义不同，不能沿用 */
     if (p->update_flag == PARAM_UPDATE_PENDING) {
         p->update_flag = PARAM_UPDATE_FAILED;
     }
@@ -392,10 +389,10 @@ int param_alert_get(uint32_t index, alert_record_t *out)
 int param_alert_clear(void)
 {
     /* 告警区和参数块在同一个 4KB 页里，没有任何办法单独擦它。
-     * 旧工程的 param_manager_clear_alert_records() 直接
-     * param_flash_erase(ALERT_RECORD_START_ADDR, 160) ——
-     * 页对齐之后实际擦掉的是整个参数页，参数会被一起抹掉。
-     * 这里走整页读-改-写：只把 +0x200 那段填回 0xFF。 */
+     * 对告警区单独做"擦一段、写回一段"是参数存储最典型的错误：
+     * 页对齐后实际擦掉的是整个参数页，只把告警段写回，
+     * 主/备参数块就跟着一起没了。
+     * 所以必须整页读-改-写：只把 +0x200 那段填回 0xFF。 */
     if (fmc_read(PART_PARAM_BASE, s_page_cache, PART_PARAM_SIZE) != FMC_OK) {
         return PARAM_STORE_ERR;
     }
@@ -465,7 +462,7 @@ void param_boot_unconfirm(void)
 }
 
 /*============================================================================
- * 自测：把第 7 步的验收标准做成一条命令
+ * 自测：参数页整页读-改-写的完整性验证，一条命令跑完
  *============================================================================*/
 
 int param_store_selftest(void)

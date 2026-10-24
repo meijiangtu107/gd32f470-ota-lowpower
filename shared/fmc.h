@@ -1,10 +1,6 @@
-/**
- * @file    fmc.h
- * @brief   片上 Flash 擦写（FMC = Flash Memory Controller）
- * @author  meijiangtu
- * @date    2026-10-10
- *
- * 本层只管"物理上把字节写进 Flash"，不认识参数结构体、不认识分区语义。
+/*
+ * 片上 Flash 擦写（FMC = Flash Memory Controller）。
+ * 本层只管"物理上把字节写进 Flash"，不认识参数结构体、不认识分区语义；
  * 参数怎么组织、写哪一块，是 param_store 的事。
  *
  * 两个必须记住的硬件事实：

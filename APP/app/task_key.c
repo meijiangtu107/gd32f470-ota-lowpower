@@ -1,4 +1,4 @@
-/* 按键事件处理任务 */
+/* 按键事件处理任务：事件以 log_printf 打印到 USART0 */
 
 #include "tasks.h"
 #include "bsp_key.h"

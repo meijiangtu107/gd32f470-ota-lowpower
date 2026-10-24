@@ -1,4 +1,4 @@
-/* Bootloader 启动核心接口。 */
+/* 启动核心接口：一次上电的槽位决策、升级与交接。 */
 
 #ifndef BL_CORE_H
 #define BL_CORE_H

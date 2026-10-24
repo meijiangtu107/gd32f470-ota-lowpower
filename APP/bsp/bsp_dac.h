@@ -1,4 +1,4 @@
-/* DAC0_OUT0（PA4）：软件写的模拟量输出，PA4 跳线到 PC1 作为回读点 */
+/* DAC 输出接口：DAC0_OUT0 输出在 PA4，跳线接 PC1 供 ADC 回读验证 */
 
 #ifndef BSP_DAC_H
 #define BSP_DAC_H

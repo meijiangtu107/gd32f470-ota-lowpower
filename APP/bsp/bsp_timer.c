@@ -1,14 +1,7 @@
-/**
- * @file    bsp_timer.c
- * @brief   TIMER1 —— 给 ADC 提供固定频率的触发脉冲
- * @author  meijiangtu
- * @date    2026-09-27
- *
- * 频率是算出来的，不是写死的：
- *   TIMER1 挂在 APB1 域。APB1 分频 ≠ 1 时，定时器时钟 = APB1 × 2。
- *   不硬编码 120MHz —— 问 rcu 要，将来时钟树改了这里自动跟上，
- *   算错了也会在 bsp_timer1_get_trig_hz() 里露出来。
- */
+/* TIMER1：给 ADC 提供固定频率的 TRGO 触发脉冲。
+ * 定时器时钟是算出来的：TIMER1 挂 APB1 域，APB1 分频 ≠ 1 时定时器时钟 = APB1 × 2。
+ * 不硬编码 120MHz —— 问 rcu 要，时钟树改了这里自动跟上，
+ * 算错了也会在 bsp_timer1_get_trig_hz() 里露出来。 */
 
 #include "bsp_timer.h"
 #include "gd32f4xx.h"

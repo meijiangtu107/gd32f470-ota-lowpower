@@ -1,16 +1,12 @@
-/**
- * @file    param_store.h
- * @brief   参数存储：整页读-改-写 + 主备双副本
- * @author  meijiangtu
- * @date    2026-10-10
- *
+/*
+ * 参数存储：整页读-改-写 + 主备双副本。
  * 这一层管"参数怎么组织、怎么写进参数页"，
  * 底层擦写交给 shared/fmc.c，结构体定义在 shared/param_layout.h。
  *
- * 【为什么不能直接擦 256 字节】
+ * 【为什么不能只擦只写参数块】
  * Flash 擦除的最小单位是页（4KB）。想改主参数块，按页擦会把同一页里的
- * 备份块、告警记录区、BL 日志区一起抹掉 —— 这正是旧工程
- * param_manager_save() 的 bug（擦 4KB 只写回 256B）。
+ * 备份块、告警记录区、BL 日志区一起抹掉；"只擦后部分写回"会连带抹掉
+ * 同页其它数据，这是参数存储最典型的错误。
  * 正确做法只有一条：整页读进 RAM → 在 RAM 里改 → 整页擦 → 整页写回。
  */
 
@@ -86,7 +82,7 @@ uint32_t param_alert_count(void);
  * 所以这里走整页读-改-写：只把 +0x200 那段填回 0xFF，其余原样保留。 */
 int      param_alert_clear(void);
 
-/* ---- A/B 槽位（Step 10 的 Bootloader 用）---- */
+/* ---- A/B 槽位（Bootloader 启动流程专用）---- */
 
 uint32_t param_get_boot_slot(void);
 void     param_set_boot_slot(uint32_t slot);
@@ -122,7 +118,7 @@ void param_boot_unconfirm(void);
 void param_boot_set_confirmed(void);
 
 /* ---- 自测 ----
- * 把 Step 7 的验收标准做成可执行的一条命令：
+ * 把参数页擦写的完整性验证做成一条可执行命令：
  * 往告警区和 BL 日志区各埋一个靶子 -> 存参数（整页擦写）-> 看靶子还在不在。
  * 返回 PARAM_STORE_OK 表示通过；失败返回负数，绝对值指出死在哪一步。 */
 int param_store_selftest(void);

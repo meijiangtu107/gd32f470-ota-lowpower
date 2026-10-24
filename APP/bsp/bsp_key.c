@@ -1,15 +1,10 @@
-/**
- * @file    bsp_key.c
- * @brief   按键扫描与消抖（边沿检测法）
- * @author  meijiangtu
- * @date    2026-09-16
+/*
+ * 按键扫描与消抖：不写消抖延时，靠"每 10ms 采样一次"过滤机械抖动；
+ * 按下/松开用异或检测边沿，一次完整按下只产生一个事件。
  *
- * 思路：不写消抖延时，靠"每 10ms 采样一次"过滤掉机械抖动。
- *       按下/松开用异或检测边沿，一次按下只产生一个事件。
- *
- *        key_val  本次电平（每位一个键）
- *        key_down = key_val & (key_old ^ key_val)    下降沿 = 刚按下
- *        key_up   = ~key_val & (key_old ^ key_val)   上升沿 = 刚松开
+ *   key_val  本次电平（每位一个键）
+ *   key_down = key_val & (key_old ^ key_val)     下降沿 = 刚按下
+ *   key_up   = ~key_val & (key_old ^ key_val)    上升沿 = 刚松开
  */
 
 #include "bsp_key.h"

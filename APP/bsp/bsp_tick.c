@@ -1,9 +1,5 @@
-/**
- * @file    bsp_tick.c
- * @brief   SysTick 时基：毫秒计数 + 微秒延时
- * @author  meijiangtu
- * @date    2026-09-16
- */
+/* SysTick 时基：1ms 中断累加毫秒计数，微秒延时走 DWT 周期计数器。
+ * 中断里只做 s_tick_ms++，其余一概不干。 */
 
 #include "bsp_tick.h"
 #include <stdbool.h>

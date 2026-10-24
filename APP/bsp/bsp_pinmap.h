@@ -1,9 +1,6 @@
-/**
- * @file    bsp_pinmap.h
- * @brief   全工程引脚定义唯一来源
- * @author  meijiangtu
- * @date    2026-09-16
- * @note    表定义在 bsp_gpio.c。改引脚只改那一处，别处不动。
+/*
+ * 全工程引脚定义唯一来源：声明都在这里，表定义在 bsp_gpio.c。
+ * 改引脚只改那一处，别处不动。
  */
 
 #ifndef BSP_PINMAP_H
@@ -69,7 +66,7 @@ extern const bsp_pin_t BSP_PIN_I2C0_SDA;
 /* ADC0 模拟输入：PC0 = CH10 / PC1 = CH11。
  * 模拟模式不用复用功能（af = 0），otype/ospeed 也不起作用。
  * PC1 是 DAC 回读点：PA4（DAC0_OUT0）用跳线接过来，用来验证 DAC 输出。
- * 旧工程注释也写 PC1，但实际采的是 CH12/PC2 —— 从没真正读回过 DAC */
+ * 引脚与通道的对应以本表为准：PC1 = CH11，PC2 才是 CH12，别混 */
 extern const bsp_pin_t BSP_PIN_ADC_CH0;
 extern const bsp_pin_t BSP_PIN_ADC_CH1;
 

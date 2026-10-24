@@ -1,4 +1,4 @@
-/* 主循环任务调度器 */
+/* 主循环调度器：按 s_tasks 表的周期轮询执行，无抢占、非阻塞 */
 
 #include "app_sched.h"
 #include "tasks.h"

@@ -1,4 +1,4 @@
-/* GPIO 统一配置入口 */
+/* 按描述符配置引脚的接口，描述符结构见 bsp_pinmap.h */
 
 #ifndef BSP_GPIO_H
 #define BSP_GPIO_H

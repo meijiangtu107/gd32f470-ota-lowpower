@@ -1,4 +1,4 @@
-/* 串口调试打印任务，当前无输出 */
+/* 调试日志任务：当前为空壳，需要时恢复函数体内注释掉的 log_printf */
 
 #include "tasks.h"
 #include "bsp_tick.h"

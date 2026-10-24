@@ -1,4 +1,4 @@
-/* Bootloader 时基接口：SysTick 毫秒计数。 */
+/* SysTick 毫秒时基接口：整个 BL 唯一的中断源。 */
 
 #ifndef BL_TICK_H
 #define BL_TICK_H

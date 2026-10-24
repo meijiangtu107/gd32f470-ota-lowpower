@@ -1,5 +1,5 @@
-/* CRC-32/ISO-HDLC：反射多项式 0xEDB88320，初值 0xFFFFFFFF，结果取反。
- * 逐位实现，无查表。 */
+/* CRC-32/ISO-HDLC（即 zlib.crc32 那一套）：反射多项式 0xEDB88320，
+ * 初值 0xFFFFFFFF，出口取反。逐位计算，省掉 1KB 查表。 */
 
 #include "crc.h"
 

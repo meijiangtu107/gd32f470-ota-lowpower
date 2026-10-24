@@ -1,8 +1,5 @@
-/**
- * @file    partition.h
- * @brief   Flash 分区表（唯一来源，APP 与 Bootloader 共用）
- * @author  meijiangtu
- * @date    2026-10-10
+/*
+ * Flash 分区表（唯一来源，APP 与 Bootloader 共用）。
  *
  * 512KB Flash 切成 6 块。所有边界都按 4KB 页对齐 ——
  * FMC 擦除的最小单位就是页，边界不对齐就会误伤邻区。

@@ -1,4 +1,5 @@
-/* ADC0 规则组 + DMA1_CH4：PC0/PC1 两路模拟输入，TIMER1 TRGO 触发 */
+/* ADC0 采集链：TIMER1 TRGO 硬件触发规则组，DMA1_CH4 循环搬运。
+ * 两路输入 PC0/PC1 = CH10/CH11，主循环只碰冻结快照，不碰 DMA 缓冲区。 */
 
 #include "bsp_adc.h"
 #include <stddef.h>

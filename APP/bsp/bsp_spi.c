@@ -1,16 +1,7 @@
-/**
- * @file    bsp_spi.c
- * @brief   SPI 总线：初始化 + 收发
- * @author  meijiangtu
- * @date    2026-09-16
- *
- * 用轮询收发，不用 DMA —— 器件一次只读写几个字节，
- * DMA 的配置开销比轮询还大。
- *
- * 注：轮询方式下不存在"FTF 早于 TRANS"的 CS 时机坑，
- *     因为 SPI_FLAG_RBNE 置起时字节已经完整收完。
- *     将来若改用 DMA 传输，必须补等 SPI_FLAG_TRANS 清零再拉 CS。
- */
+/* SPI 总线：两条链路（SPI0 → GD25Qxx Flash，SPI3 → GD30AD3344），轮询收发。
+ * 不用 DMA —— 挂在总线上的器件一次只读写几个字节，DMA 的配置开销比轮询还大。
+ * 轮询方式下不存在"FTF 早于 TRANS"的 CS 时机坑：SPI_FLAG_RBNE 置起时字节
+ * 已经完整收完；将来若改用 DMA 传输，必须补等 SPI_FLAG_TRANS 清零再拉 CS。 */
 
 #include "bsp_spi.h"
 #include "bsp_pinmap.h"

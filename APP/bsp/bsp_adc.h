@@ -1,4 +1,4 @@
-/* ADC0 规则组 + DMA1_CH4：PC0/PC1 两路模拟输入，TIMER1 TRGO 触发 */
+/* ADC 采样接口：取一轮同一时刻的 2 通道 12bit 原始值快照 */
 
 #ifndef BSP_ADC_H
 #define BSP_ADC_H

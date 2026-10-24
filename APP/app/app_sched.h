@@ -1,4 +1,4 @@
-/* 主循环任务调度器 */
+/* 调度器接口：任务表项定义与初始化/轮询入口 */
 
 #ifndef APP_SCHED_H
 #define APP_SCHED_H

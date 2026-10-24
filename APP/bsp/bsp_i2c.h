@@ -1,10 +1,6 @@
-/**
- * @file    bsp_i2c.h
- * @brief   I2C0 总线（OLED 用）
- * @author  meijiangtu
- * @date    2026-09-16
- * @note    只做"往某个从设备写一串字节"。I2C 是开漏总线，
- *          引脚必须配成 GPIO_OTYPE_OD，否则会总线争用。
+/*
+ * I2C0 接口：往某个从设备写一串字节，仅此而已。
+ * I2C 是开漏总线，引脚必须配 GPIO_OTYPE_OD，否则会总线争用。
  */
 
 #ifndef BSP_I2C_H
@@ -12,7 +8,8 @@
 
 #include <stdint.h>
 
-/* OLED 的 7 位地址。模块丝印常见 0x3C/0x3D，旧工程用 0x72（8 位写地址） */
+/* OLED 从机地址。模块丝印常标 0x3C/0x3D（7 位），这里填的是
+ * 8 位写地址：0x3C << 1 = 0x78，注意两种写法的换算 */
 #define BSP_I2C_OLED_ADDR   0x78U
 
 int  bsp_i2c0_init(void);

@@ -126,10 +126,10 @@ int drv_gd25q_write(uint32_t addr, const uint8_t *buf, uint16_t len)
         GD25Q_CS_LOW();
         (void)bsp_spi_xfer_byte(SPI0, GD25Q_CMD_PP);
         gd25q_send_addr(addr);
-        bsp_spi_xfer(SPI0, buf, NULL, n);   /* ② 只发不收 */
+        bsp_spi_xfer(SPI0, buf, NULL, n);   /* 只发不收 */
         GD25Q_CS_HIGH();
 
-        if (gd25q_wait_busy() != 0) {   /* ③ 等芯片写完 */
+        if (gd25q_wait_busy() != 0) {   /* 等芯片写完 */
             return -1;
         }
 

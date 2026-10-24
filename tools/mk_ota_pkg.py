@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-把固件打包成 Bootloader 能接收的 OTA 包。
+固件 -> OTA 升级包打包工具，接收端为 Bootloader 的串口收包状态机。
 
 用法:
     python tools/mk_ota_pkg.py <输入文件> [-o 输出文件]
-    python tools/mk_ota_pkg.py --check <包文件>          # 反过来校验一个包
+    python tools/mk_ota_pkg.py --check <包文件>          # 校验一个已有的包
 
 输入可以是:
     .bin    fromelf / Keil 导出的原始二进制
     .hex    Keil 生成的 Intel HEX（自动转成二进制）
-    .axf    Keil 的 ELF（自动找 fromelf 转，找不到就报错提示你用 .hex）
+    .axf    Keil 的 ELF（自动找 fromelf 转，找不到就报错提示改用 .hex）
 
 输出默认是 <输入名>.pkg
 
@@ -22,9 +22,9 @@
     0x0C    4   hcrc   前 12 字节的 CRC32
     0x10    N   固件原始字节
 
-CRC 算法与固件里的 shared/crc.c 一致：CRC-32/ISO-HDLC
+CRC 与固件侧 shared/crc.c 一致：CRC-32/ISO-HDLC
 （多项式 0xEDB88320 反射，初值 0xFFFFFFFF，出口异或 0xFFFFFFFF）。
-Python 标准库的 zlib.crc32 就是它，不需要自己写。
+Python 标准库的 zlib.crc32 就是它，不必自己实现。
 """
 
 import argparse
@@ -46,7 +46,7 @@ if sys.platform == "win32":
 MAGIC = b"OTA1"
 HEADER_SIZE = 16
 
-# 从分区表抄来的（和 shared/partition.h 保持一致）
+# 槽基址与容量，必须和 shared/partition.h 保持一致
 SLOT_A_BASE = 0x08011000
 SLOT_B_BASE = 0x08029000
 SLOT_SIZE = 0x18000            # 96KB

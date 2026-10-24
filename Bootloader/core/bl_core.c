@@ -1,4 +1,4 @@
-/* Bootloader 启动核心：读参数页，判状态，跳槽或回滚。 */
+/* 启动决策核心：按参数页里的 update_flag / boot_slot 决定跳槽、收包升级还是回滚。 */
 
 #include "gd32f4xx.h"
 
@@ -40,7 +40,7 @@ static void bl_rollback(const char *why)
     /* 三个字段改完只落盘一次，必须显式 save()。 */
     param_set_boot_slot(other);
 
-    /* 旧固件有效，标记为已确认，避免下次启动再回滚。 */
+    /* 回滚目标槽的固件既然有效，就标为已确认，免得下次启动再回滚一次。 */
     param_boot_set_confirmed();
 
     if (param_store_save() != PARAM_STORE_OK) {
@@ -51,7 +51,7 @@ static void bl_rollback(const char *why)
     bl_uart_printf(BL_LOG_USART, "rollback saved\r\n");
     bl_delay_ms(50UL);
 
-    /* 复位让启动状态机从第 1 步重走。 */
+    /* 复位，让启动决策从头再走一遍。 */
     NVIC_SystemReset();
     for (;;) {
     }
@@ -67,7 +67,7 @@ void bl_core_run(void)
 
     bl_uart_printf(BL_LOG_USART, "\r\n=== ximenzi Bootloader v0.2 ===\r\n");
 
-    /* ---- 第 1 步：读参数（主/备双副本择优，坏哪份修哪份）---- */
+    /* ---- 读参数：主/备双副本择优，坏哪份修哪份 ---- */
     pr = param_store_init();
     bl_uart_printf(BL_LOG_USART, "param -> %d (0=ok 1=repaired 2=default 3=migrated)\r\n", pr);
 
@@ -83,7 +83,7 @@ void bl_core_run(void)
     }
 #endif
 
-    /* ---- 第 2 步：FAST_UPGRADE —— App 请求进升级态 ---- */
+    /* ---- FAST_UPGRADE：App 请求进升级态 ---- */
     if (flag == PARAM_UPDATE_FAST_UPGRADE) {
         int r;
 
@@ -103,7 +103,7 @@ void bl_core_run(void)
                            (unsigned long)bl_ota_size());
 
             /* 装入非活动槽；成功则切槽并复位（不返回），
-             * 失败返回负数，照常启动旧固件。 */
+             * 失败返回负数，维持原槽照常启动。 */
             r = bl_ota_install();
             bl_uart_printf(BL_LOG_USART,
                            "[ota] install failed (err %d) -> normal boot\r\n", r);
@@ -113,7 +113,7 @@ void bl_core_run(void)
         }
     }
 
-    /* ---- 第 3 步：PENDING —— Download 区有完整镜像待安装 ---- */
+    /* ---- PENDING：Download 区已有完整镜像待安装 ---- */
     if (flag == PARAM_UPDATE_PENDING) {
         bl_uart_printf(BL_LOG_USART, "PENDING: image staged in download area\r\n");
         /* 校验 Download -> 装非活动槽 -> 切 boot_slot -> 复位。
@@ -126,7 +126,7 @@ void bl_core_run(void)
     slot = param_store_get()->boot_slot;
     base = PART_SLOT_BASE(slot);
 
-    /* ---- 第 4 步：回滚判定 —— 新固件是否已自证 ----
+    /* ---- 回滚判定：新固件是否已自证 ----
      * 判据为 boot_confirm 是否签字，而非是否检测到错误。 */
     if (param_store_get()->boot_confirm != PARAM_BOOT_CONFIRM_MAGIC) {
         trials = param_store_get()->boot_trials;
@@ -147,7 +147,7 @@ void bl_core_run(void)
         (void)param_store_save();
     }
 
-    /* ---- 第 5 步：活动槽里是否有可运行的固件 ---- */
+    /* ---- 活动槽里有没有可运行的固件 ---- */
     if (app_vector_valid(base) != 1) {
         bl_uart_printf(BL_LOG_USART, "slot %lu has no valid firmware\r\n", (unsigned long)slot);
         /* 另一槽有效则切换过去。 */
@@ -155,7 +155,7 @@ void bl_core_run(void)
         /* 不返回 */
     }
 
-    /* ---- 第 6 步：交接。先关串口，APP 会自行重新配置 ---- */
+    /* ---- 交接：先关串口，APP 会自行重新配置 ---- */
     bl_uart_printf(BL_LOG_USART, "jumping to 0x%08lX\r\n", (unsigned long)base);
     bl_delay_ms(50UL);          /* 让串口把最后一行发完再关 */
     bl_uart_deinit();

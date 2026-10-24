@@ -1,4 +1,4 @@
-/* Bootloader 主程序：初始化时基与串口后进入启动核心。 */
+/* BL 入口：备好 1ms 时基与两路串口后交棒给 bl_core_run()，后者不返回。 */
 
 #include "gd32f4xx.h"
 #include "bl_tick.h"

@@ -1,4 +1,4 @@
-/* Bootloader 中断服务：仅 SysTick 一个中断，串口为轮询方式。 */
+/* BL 的中断向量：全程只使能 SysTick 一个中断（1ms 时基），串口收发均为轮询。 */
 
 #include "gd32f4xx.h"
 #include "bl_tick.h"

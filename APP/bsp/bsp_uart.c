@@ -1,13 +1,7 @@
-/**
- * @file    bsp_uart.c
- * @brief   串口：USART0 调试口 + USART1 RS485
- * @author  meijiangtu
- * @date    2026-09-16
- *
- * 接收：DMA 循环搬运到缓冲区，线路空闲（IDLE）时把这一批抄进 ringbuf。
- *       主循环从 ringbuf 里慢慢取，两边解耦。
- * 发送：轮询等 TBE。USART1 发送前后要控制 RS485 的 DE 引脚方向。
- */
+/* 串口：USART0 调试口（PA9/PA10，DMA1_CH5）+ USART1 RS485（PD5/PD6，DMA0_CH5，DE=PE8）。
+ * 接收：DMA 循环搬运到缓冲区，线路空闲（IDLE）中断里把这一批抄进 ringbuf，
+ *       主循环从 ringbuf 慢慢取，两边解耦。
+ * 发送：轮询等 TBE。USART1 发送前后要控制 RS485 的 DE 引脚方向。 */
 
 #include "bsp_uart.h"
 #include <stdarg.h>
@@ -71,49 +65,32 @@ static void uart_param_config(uint32_t usart, uint32_t baud)
 static void uart_dma_rx_config(uint32_t dma, dma_channel_enum ch,
                                uint32_t usart, uint8_t *buf)
 {
-    /* 定义 DMA 单数据模式初始化结构体 */
+    /* DMA 通道配置：外设 → 内存，循环模式，8bit */
     dma_single_data_parameter_struct dma_cfg;
 
-    /* 将配置结构体各个成员初始化为默认值，防止栈上野数据干扰 */
+    /* 先填默认值再逐项覆盖——init 会读取全部成员，栈上野值会被写进寄存器 */
     dma_single_data_para_struct_init(&dma_cfg);
 
-    /* 复位指定的 DMA 通道寄存器，确保在初始干净状态下进行配置 */
+    /* 复位通道，不在残留配置上叠加 */
     dma_deinit(dma, ch);
 
-    /* 设置传输方向：外设到内存 (外设作为源，内存作为目标) */
     dma_cfg.direction           = DMA_PERIPH_TO_MEMORY;
-
-    /* 设置目标内存基地址 (接收缓冲区首地址) */
     dma_cfg.memory0_addr        = (uint32_t)buf;
-
-    /* 使能内存地址递增模式：每搬运一个数据，内存指针自动后移 */
     dma_cfg.memory_inc          = DMA_MEMORY_INCREASE_ENABLE;
 
-    /* 设置外设源地址：指向串口的数据寄存器 (USART_DATA) */
+    /* 外设侧始终是同一个数据寄存器，地址不递增 */
     dma_cfg.periph_addr         = (uint32_t)&USART_DATA(usart);
-
-    /* 禁用外设地址递增模式：串口接收始终读取同一个数据寄存器 */
     dma_cfg.periph_inc          = DMA_PERIPH_INCREASE_DISABLE;
-
-    /* 设置数据传输位宽为 8 位 (1 个字节)，匹配串口通信常规字节流 */
     dma_cfg.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
-
-    /* 设置本次 DMA 传输的数据量大小 (缓冲区容量) */
     dma_cfg.number              = BSP_UART_RX_SIZE;
-
-    /* 设置该通道在总线仲裁时的软件优先级为高优先级 */
     dma_cfg.priority            = DMA_PRIORITY_HIGH;
-
-    /* 循环模式使能：搬满设定的数据量后自动从缓冲区开头重新循环存入 */
     dma_cfg.circular_mode       = DMA_CIRCULAR_MODE_ENABLE;
 
-    /* 将上述配置参数写入硬件寄存器，完成单数据模式通道初始化 */
     dma_single_data_mode_init(dma, ch, &dma_cfg);
 
-    /* 配置通道的外设请求信号多路复用：将当前通道绑定到子外设 4 (串口 RX 请求路由) */
+    /* 子外设 4 = 这条通道上的 USART RX 请求路由 */
     dma_channel_subperipheral_select(dma, ch, DMA_SUBPERI4);
 
-    /* 使能该 DMA 通道，硬件进入就绪状态，等待串口接收触发信号 */
     dma_channel_enable(dma, ch);
 }
 

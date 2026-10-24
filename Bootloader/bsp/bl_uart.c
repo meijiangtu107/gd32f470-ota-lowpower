@@ -1,4 +1,5 @@
-/* Bootloader 串口：轮询收发。USART0 PA9/PA10 调试口，USART1 PD5/PD6 RS485，DE = PE8。 */
+/* 轮询式串口驱动，无中断、无 DMA。两路：USART0 (PA9/PA10) 调试口，
+ * USART1 (PD5/PD6) 挂 RS485，方向脚 DE = PE8。 */
 
 #include <stdarg.h>
 #include <stdio.h>
