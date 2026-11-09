@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "bsp_pinmap.h"
 #include "bsp_gpio.h"
+#include "bsp_irq_prio.h"
 #include "ringbuf.h"
 #include "gd32f4xx.h"
 #include "bsp_tick.h"
@@ -139,9 +140,6 @@ int bsp_uart0_init(uint32_t baud)
     rcu_periph_clock_enable(U0_USART_RCU);
     rcu_periph_clock_enable(RCU_DMA1);
 
-    /* 中断优先级分组：4 位抢占优先级，0 位子优先级 */
-    nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
-
     uart_param_config(U0_USART, baud);
     uart_dma_rx_config(U0_DMA, U0_DMA_CH, U0_USART, s_rx0);
 
@@ -149,7 +147,7 @@ int bsp_uart0_init(uint32_t baud)
 
     /* 开空闲中断。数据由 DMA 搬，CPU 只在"一帧收完"时被打断一次 */
     usart_interrupt_enable(U0_USART, USART_INT_IDLE);
-    nvic_irq_enable(USART0_IRQn, 2U, 0U);
+    nvic_irq_enable(USART0_IRQn, BSP_IRQ_PRIO_USART0, 0U);
 
     return 0;
 }
@@ -177,15 +175,13 @@ int bsp_uart1_init(uint32_t baud)
     rcu_periph_clock_enable(U1_USART_RCU);
     rcu_periph_clock_enable(RCU_DMA0);
 
-    nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
-
     uart_param_config(U1_USART, baud);
     uart_dma_rx_config(U1_DMA, U1_DMA_CH, U1_USART, s_rx1);
 
     ringbuf_init(&s_rb1, s_rb1_store, BSP_UART_RB_SIZE);
 
     usart_interrupt_enable(U1_USART, USART_INT_IDLE);
-    nvic_irq_enable(USART1_IRQn, 3U, 0U);
+    nvic_irq_enable(USART1_IRQn, BSP_IRQ_PRIO_USART1, 0U);
 
     return 0;
 }

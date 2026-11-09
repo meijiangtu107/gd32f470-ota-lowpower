@@ -5,16 +5,16 @@
 
   <Header>### uVision Project, (C) Keil Software</Header>
 
-  <WorkspaceName>.GD32F470.uvmpw</WorkspaceName>
+  <WorkspaceName>C:\Users\Lenovo\Desktop\ximenzi\GD32F470.uvmpw</WorkspaceName>
 
   <project>
     <PathAndName>.\APP\APP.uvprojx</PathAndName>
-    <NodeIsActive>1</NodeIsActive>
     <NodeIsExpanded>1</NodeIsExpanded>
   </project>
 
   <project>
     <PathAndName>.\Bootloader\BL.uvprojx</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
     <NodeIsExpanded>1</NodeIsExpanded>
   </project>
 

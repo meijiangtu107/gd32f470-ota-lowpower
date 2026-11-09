@@ -2,12 +2,14 @@
  * 初始化顺序有依赖：参数页先于 USART1，RTC 先于 app_cmd，ADC 校准先于 TIMER1 启动。 */
 
 #include "gd32f4xx.h"
+#include "FreeRTOS.h"
+#include "task.h"
 #include "bsp_tick.h"
 #include "bsp_uart.h"
 #include "bsp_led.h"
 #include "bsp_key.h"
 #include "bsp_i2c.h"
-#include "app_sched.h"
+#include "bsp_irq_prio.h"
 #include "tasks.h"
 #include "bsp_spi.h"
 #include "drv_gd25qxx.h"
@@ -42,6 +44,9 @@ int main(void)
 
     /* 中断向量表指向本槽基址；必须是 main() 的第一条语句，早于任何可能开中断的初始化 */
     SCB->VTOR = APP_SLOT_BASE;
+
+    /* RTOS 迁移：优先级分组集中设置（原散在两处 uart init 里），早于所有外设初始化 */
+    bsp_irq_prio_init();
 
     /* 初始化顺序：tick 最先，其次 USART0 */
     bsp_tick_init();
@@ -131,8 +136,10 @@ int main(void)
     /* 此后 USART0 只跑协议；打开日志会与协议帧混流，导致上位机解析失败 */
     bsp_log_enable(0U);
 
-    app_sched_init();
+    /* RTOS 迁移：原轮询调度换成任务 + 内核调度器 */
+    app_tasks_create();
+    vTaskStartScheduler();
+
     for (;;) {
-        app_sched_run();
-    }
+    }   /* 走到这里说明内核启动失败（通常是堆不够） */
 }

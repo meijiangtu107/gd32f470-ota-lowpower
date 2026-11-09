@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include "bsp_pinmap.h"
 #include "bsp_gpio.h"
+#include "bsp_irq_prio.h"
 #include "bsp_tick.h"
 #include "gd32f4xx.h"
 
@@ -15,9 +16,6 @@
 #define ADC_DMA_CH      DMA_CH4
 #define ADC_DMA_RCU     RCU_DMA1
 #define ADC_DMA_SUB     DMA_SUBPERI0
-
-/* DMA 中断优先级 5：0 系统关键 / 1 SysTick / 2 USART0 / 3 USART1 / 4 USART2 / 5 DMA·SPI·I2C */
-#define ADC_DMA_IRQ_PRIO    5U
 
 /* ADC 时钟 = APB2/8，APB2=120MHz → 15MHz */
 #define ADC_CLK_DIV         ADC_ADCCK_PCLK2_DIV8
@@ -71,7 +69,7 @@ int bsp_adc_init(void)
     /* ④ 一轮搬完（FTF）进中断做冻结副本；DMA 由硬件写内存，__disable_irq() 挡不住，不能直接读 s_adc_buf */
     dma_flag_clear(ADC_DMA, ADC_DMA_CH, DMA_FLAG_FTF);
     dma_interrupt_enable(ADC_DMA, ADC_DMA_CH, DMA_INT_FTF);
-    nvic_irq_enable(DMA1_Channel4_IRQn, ADC_DMA_IRQ_PRIO, 0U);
+    nvic_irq_enable(DMA1_Channel4_IRQn, BSP_IRQ_PRIO_DMA_ADC, 0U);
     dma_channel_enable(ADC_DMA, ADC_DMA_CH);
 
     /* ⑤ ADC 本体 */

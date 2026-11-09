@@ -7,6 +7,9 @@
 
 #include "gd32f4xx.h"       /* NVIC_SystemReset() */
 
+#include "FreeRTOS.h"       /* vTaskSuspendAll / xTaskResumeAll */
+#include "task.h"
+
 #include "app_cmd.h"
 #include "app_adc.h"
 #include "app_protocol.h"
@@ -202,18 +205,20 @@ static void cmd_alert_add(uint8_t channel, float threshold, float value)
 /* 边沿触发：只在"未超 -> 超"的那一刻记一次 */
 static void cmd_alert_check(uint8_t channel)
 {
+    app_adc_snapshot_t s;
     int over;
 
     if (channel >= APP_ADC_CH_COUNT) {
         return;
     }
 
-    over = app_adc_over_threshold(channel);
+    /* 一次取齐 value 与 threshold：分别调 get 会在两次读之间被 t_adc 更新，
+     * 可能出现"新值比旧阈值"导致误报或漏报 */
+    app_adc_snapshot(channel, &s);
+    over = (s.value > s.threshold) ? 1 : 0;
 
     if ((over != 0) && (s_alert_over[channel] == 0U)) {
-        cmd_alert_add(channel,
-                      app_adc_get_threshold(channel),
-                      app_adc_get_value(channel));
+        cmd_alert_add(channel, s.threshold, s.value);
     }
 
     s_alert_over[channel] = (uint8_t)over;
@@ -454,9 +459,14 @@ static void cmd_ctrl_sleep(void)
     s_auto_report = 0U;
     task_led_set_work(0U);
 
-    /* 先应答并等发送完成，之后关串口，避免半截帧 */
+    /* 先应答，再冻结任务切换：从关外设到外设恢复完成，只有本任务在跑，
+     * 避免其他任务碰已关闭或尚未恢复的外设。
+     * 冻结期间 bsp_delay_ms 自动走 DWT 忙等（见 bsp_tick.c 的状态判断）。 */
     app_protocol_send_response(AP_CMD_CTRL_SLEEP, &ok, 1U);
-    bsp_delay_ms(20U);
+
+    vTaskSuspendAll();
+
+    bsp_delay_ms(20U);      /* 忙等串口发完，避免半截帧 */
 
     /* 睡前关闭外部器件：OLED 电荷泵 100~300µA，AD3344 连续转换 150µA；
      * 需在关 I2C/SPI 之前完成，从机不在线时函数内部有超时保护 */
@@ -466,6 +476,9 @@ static void cmd_ctrl_sleep(void)
     /* PA0 按键唤醒，睡到按键按下；返回时外设由 main.c 回调恢复。
      * 改用 RTC 定时唤醒可换成 bsp_pmu_deepsleep_rtc(10U) */
     (void)bsp_pmu_deepsleep_key();
+
+    /* 外设已恢复，解冻：其他任务从这里继续 */
+    xTaskResumeAll();
 
     app_protocol_send_text("instrument wakeup\r\n");
 }

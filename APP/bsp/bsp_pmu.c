@@ -19,6 +19,7 @@
 
 #include "bsp_pmu.h"
 #include "bsp_pinmap.h"
+#include "bsp_irq_prio.h"
 #include "bsp_rtc.h"
 #include "bsp_tick.h"
 #include "gd32f4xx.h"
@@ -204,7 +205,7 @@ static void pmu_rtc_wakeup_start(uint16_t seconds)
 
     rtc_interrupt_enable(RTC_INT_WAKEUP);
     exti_init(EXTI_22, EXTI_INTERRUPT, EXTI_TRIG_RISING);
-    nvic_irq_enable(RTC_WKUP_IRQn, 1U, 0U);
+    nvic_irq_enable(RTC_WKUP_IRQn, BSP_IRQ_PRIO_WAKEUP, 0U);
 
     /* 最后才启动计数器 */
     rtc_wakeup_enable();
@@ -230,7 +231,7 @@ static void pmu_key_wakeup_start(void)
     /* 按键按下是下降沿（上拉，按下接地） */
     exti_init(EXTI_0, EXTI_INTERRUPT, EXTI_TRIG_FALLING);
     exti_interrupt_flag_clear(EXTI_0);
-    nvic_irq_enable(EXTI0_IRQn, 1U, 0U);
+    nvic_irq_enable(EXTI0_IRQn, BSP_IRQ_PRIO_WAKEUP, 0U);
 }
 
 static void pmu_key_wakeup_stop(void)
@@ -289,8 +290,9 @@ static void pmu_wake_restore(void)
 
     __enable_irq();
 
-    /* 重建 1ms 时基。睡眠期间 SysTick 停过，计数从睡前的值继续 */
-    bsp_tick_init();
+    /* 重建 1ms 时基。睡眠期间 SysTick 停过，计数从睡前的值继续。
+     * 用轻量版：只重设装载值、清计数、开中断，不碰内核设过的优先级。 */
+    bsp_tick_resume();
 
     /* 其余外设由上层恢复（bsp 层不认识 drivers/app） */
     if (s_restore != NULL) {

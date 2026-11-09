@@ -8,6 +8,9 @@
 #include "bsp_adc.h"
 #include "drv_gd30ad3344.h"
 #include "param_store.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
 
 /* 通道数据 */
 
@@ -18,6 +21,10 @@ typedef struct {
 } app_adc_ch_t;
 
 static app_adc_ch_t s_ch[APP_ADC_CH_COUNT];
+
+/* 保护 s_ch 的互斥锁。唯一写者是 t_adc（raw）与 t_cmd（ratio/threshold），
+ * 读者是 t_cmd；锁内只做字段搬运，计算一律在锁外。 */
+static SemaphoreHandle_t s_ch_lock = NULL;
 
 /* PT100 换算常数（实物标定值，不可修改）
  * 换算链：电压 -> 仪表放大器 -> RTD 电压 -> 电阻 -> 线性校准 -> 查表温度 */
@@ -199,6 +206,10 @@ void app_adc_init(void)
 
     s_ch[APP_ADC_CH2].ratio     = 1.0f;             /* PT100 不需要变比 */
     s_ch[APP_ADC_CH2].threshold = APP_ADC_CH2_THRESHOLD;
+
+    /* 调度器启动前创建锁：只是从内核堆分配，不涉及调度 */
+    s_ch_lock = xSemaphoreCreateMutex();
+    configASSERT(s_ch_lock != NULL);
 }
 
 void app_adc_update(void)
@@ -206,43 +217,71 @@ void app_adc_update(void)
     uint16_t snap[BSP_ADC_CH_COUNT];
     int16_t  raw16;
     float    volt;
+    float    raw2;
+    int      have_snap;
+
+    /* 先做全部耗时操作：硬件快照、SPI 读、PT100 查表——都不在锁内 */
+    have_snap = (bsp_adc_get_snapshot(snap, BSP_ADC_CH_COUNT) == 0) ? 1 : 0;
+
+    raw16 = drv_gd30_read_raw(DRV_GD30_MUX_AIN0_GND);
+    volt  = drv_gd30_raw_to_volt(raw16);
+    raw2  = pt100_voltage_to_temp(volt);
+
+    /* 锁内只搬运：三条赋值，微秒级 */
+    (void)xSemaphoreTake(s_ch_lock, portMAX_DELAY);
 
     /* CH0 / CH1：快照读取失败（上电第一轮还没到）就保留上次的值 */
-    if (bsp_adc_get_snapshot(snap, BSP_ADC_CH_COUNT) == 0) {
+    if (have_snap != 0) {
         s_ch[APP_ADC_CH0].raw = (float)snap[BSP_ADC_IDX_CH0];
         s_ch[APP_ADC_CH1].raw = (float)snap[BSP_ADC_IDX_CH1];
     }
+    s_ch[APP_ADC_CH2].raw = raw2;
 
-    /* CH2：AD3344 单端 AIN0-GND */
-    raw16 = drv_gd30_read_raw(DRV_GD30_MUX_AIN0_GND);
-    volt  = drv_gd30_raw_to_volt(raw16);
-    s_ch[APP_ADC_CH2].raw = pt100_voltage_to_temp(volt);
+    (void)xSemaphoreGive(s_ch_lock);
 }
 
-/* 访问 */
+/* 访问：所有读接口内部加锁，调用方不需要感知 */
 
 float app_adc_get_raw(uint8_t channel)
 {
+    float v;
+
     if (channel >= APP_ADC_CH_COUNT) {
         return 0.0f;
     }
-    return s_ch[channel].raw;
+
+    (void)xSemaphoreTake(s_ch_lock, portMAX_DELAY);
+    v = s_ch[channel].raw;
+    (void)xSemaphoreGive(s_ch_lock);
+    return v;
 }
 
 float app_adc_get_value(uint8_t channel)
 {
+    float v;
+
     if (channel >= APP_ADC_CH_COUNT) {
         return 0.0f;
     }
-    return s_ch[channel].raw * s_ch[channel].ratio;
+
+    (void)xSemaphoreTake(s_ch_lock, portMAX_DELAY);
+    v = s_ch[channel].raw * s_ch[channel].ratio;
+    (void)xSemaphoreGive(s_ch_lock);
+    return v;
 }
 
 float app_adc_get_ratio(uint8_t channel)
 {
+    float v;
+
     if (channel >= APP_ADC_CH_COUNT) {
         return 0.0f;
     }
-    return s_ch[channel].ratio;
+
+    (void)xSemaphoreTake(s_ch_lock, portMAX_DELAY);
+    v = s_ch[channel].ratio;
+    (void)xSemaphoreGive(s_ch_lock);
+    return v;
 }
 
 void app_adc_set_ratio(uint8_t channel, float ratio)
@@ -250,15 +289,24 @@ void app_adc_set_ratio(uint8_t channel, float ratio)
     if (channel >= APP_ADC_CH_COUNT) {
         return;
     }
+
+    (void)xSemaphoreTake(s_ch_lock, portMAX_DELAY);
     s_ch[channel].ratio = ratio;
+    (void)xSemaphoreGive(s_ch_lock);
 }
 
 float app_adc_get_threshold(uint8_t channel)
 {
+    float v;
+
     if (channel >= APP_ADC_CH_COUNT) {
         return 0.0f;
     }
-    return s_ch[channel].threshold;
+
+    (void)xSemaphoreTake(s_ch_lock, portMAX_DELAY);
+    v = s_ch[channel].threshold;
+    (void)xSemaphoreGive(s_ch_lock);
+    return v;
 }
 
 void app_adc_set_threshold(uint8_t channel, float threshold)
@@ -266,13 +314,36 @@ void app_adc_set_threshold(uint8_t channel, float threshold)
     if (channel >= APP_ADC_CH_COUNT) {
         return;
     }
+
+    (void)xSemaphoreTake(s_ch_lock, portMAX_DELAY);
     s_ch[channel].threshold = threshold;
+    (void)xSemaphoreGive(s_ch_lock);
 }
 
 int app_adc_over_threshold(uint8_t channel)
 {
+    int over;
+
     if (channel >= APP_ADC_CH_COUNT) {
         return 0;
     }
-    return (app_adc_get_value(channel) > s_ch[channel].threshold) ? 1 : 0;
+
+    /* value 与 threshold 必须在同一把锁里取，否则可能拿新值比旧阈值 */
+    (void)xSemaphoreTake(s_ch_lock, portMAX_DELAY);
+    over = ((s_ch[channel].raw * s_ch[channel].ratio) > s_ch[channel].threshold) ? 1 : 0;
+    (void)xSemaphoreGive(s_ch_lock);
+
+    return over;
+}
+
+void app_adc_snapshot(uint8_t channel, app_adc_snapshot_t *out)
+{
+    if ((channel >= APP_ADC_CH_COUNT) || (out == NULL)) {
+        return;
+    }
+
+    (void)xSemaphoreTake(s_ch_lock, portMAX_DELAY);
+    out->value     = s_ch[channel].raw * s_ch[channel].ratio;
+    out->threshold = s_ch[channel].threshold;
+    (void)xSemaphoreGive(s_ch_lock);
 }

@@ -6,6 +6,9 @@
 
 #include <stdint.h>
 
+/* RTOS 迁移：创建全部 FreeRTOS 任务；在 main 尾部、vTaskStartScheduler 之前调用 */
+void app_tasks_create(void);
+
 /* 按键扫描 + 事件处理，10ms 一次 */
 void task_key_run(void);
 

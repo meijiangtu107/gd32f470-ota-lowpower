@@ -1,6 +1,7 @@
 /* 中断向量表的服务函数全部集中在此，函数体只做一次转发；
- * 覆盖 SysTick(1ms)、USART0/USART1、DMA1_CH4(ADC 序列搬完)、
- * RTC 唤醒定时器(EXTI22) 和 PA0 唤醒键(EXTI0)。 */
+ * 覆盖 USART0/USART1、DMA1_CH4(ADC 序列搬完)、
+ * RTC 唤醒定时器(EXTI22) 和 PA0 唤醒键(EXTI0)。
+ * SysTick/PendSV/SVC 由 FreeRTOS 内核接管（FreeRTOSConfig.h 重映射）。 */
 
 #include "gd32f4xx.h"
 #include "bsp_tick.h"
@@ -20,12 +21,6 @@ void HardFault_Handler(void)
 
     while (1) {
     }
-}
-
-/* SysTick 中断，1ms 一次，转发到 bsp_tick_isr() */
-void SysTick_Handler(void)
-{
-    bsp_tick_isr();
 }
 
 /* USART0 中断（调试口）：只开 IDLE 中断，数据由 DMA 搬运 */

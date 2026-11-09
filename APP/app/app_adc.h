@@ -25,6 +25,15 @@ void app_adc_update(void);
 float app_adc_get_raw(uint8_t channel);
 float app_adc_get_value(uint8_t channel);       /* raw * ratio */
 
+/* 通道快照：一次取齐上报值和阈值，避免两次读取之间被 t_adc 更新。
+ * 告警判定必须用它，不能分别调 get_value / get_threshold。 */
+typedef struct {
+    float value;        /* raw * ratio（锁内算好） */
+    float threshold;
+} app_adc_snapshot_t;
+
+void app_adc_snapshot(uint8_t channel, app_adc_snapshot_t *out);
+
 float app_adc_get_ratio(uint8_t channel);
 void  app_adc_set_ratio(uint8_t channel, float ratio);
 

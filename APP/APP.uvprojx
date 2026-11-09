@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,GD32F470</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CMSIS;..\CMSIS\m-profile;..\Library\Include;.\app;.\bsp;.\drivers;.\middleware;.\Objects;.\USER;..\shared</IncludePath>
+              <IncludePath>..\CMSIS;..\CMSIS\m-profile;..\Library\Include;.\app;.\bsp;.\drivers;.\middleware;.\Objects;.\USER;..\shared;..\FreeRTOS\include;..\FreeRTOS\portable\GCC\ARM_CM4F</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -542,6 +542,36 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>FREERTOS</GroupName>
+          <Files>
+            <File>
+              <FileName>tasks.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\tasks.c</FilePath>
+            </File>
+            <File>
+              <FileName>queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\queue.c</FilePath>
+            </File>
+            <File>
+              <FileName>list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\list.c</FilePath>
+            </File>
+            <File>
+              <FileName>port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\portable\GCC\ARM_CM4F\port.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap_4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\portable\MemMang\heap_4.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>STARTUP</GroupName>
           <Files>
             <File>
@@ -640,6 +670,11 @@
               <FilePath>.\bsp\bsp_pmu.c</FilePath>
             </File>
             <File>
+              <FileName>bsp_irq_prio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\bsp\bsp_irq_prio.c</FilePath>
+            </File>
+            <File>
               <FileName>bsp_dac.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\bsp\bsp_dac.c</FilePath>
@@ -695,9 +730,9 @@
           <GroupName>APP</GroupName>
           <Files>
             <File>
-              <FileName>app_sched.c</FileName>
+              <FileName>app_tasks.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\app\app_sched.c</FilePath>
+              <FilePath>.\app\app_tasks.c</FilePath>
             </File>
             <File>
               <FileName>task_key.c</FileName>
@@ -1107,7 +1142,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,GD32F470,APP_SLOT_B</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CMSIS;..\CMSIS\m-profile;..\Library\Include;.\app;.\bsp;.\drivers;.\middleware;.\Objects;.\USER;..\shared</IncludePath>
+              <IncludePath>..\CMSIS;..\CMSIS\m-profile;..\Library\Include;.\app;.\bsp;.\drivers;.\middleware;.\Objects;.\USER;..\shared;..\FreeRTOS\include;..\FreeRTOS\portable\GCC\ARM_CM4F</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1309,6 +1344,36 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>FREERTOS</GroupName>
+          <Files>
+            <File>
+              <FileName>tasks.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\tasks.c</FilePath>
+            </File>
+            <File>
+              <FileName>queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\queue.c</FilePath>
+            </File>
+            <File>
+              <FileName>list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\list.c</FilePath>
+            </File>
+            <File>
+              <FileName>port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\portable\GCC\ARM_CM4F\port.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap_4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FreeRTOS\portable\MemMang\heap_4.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>STARTUP</GroupName>
           <Files>
             <File>
@@ -1407,6 +1472,11 @@
               <FilePath>.\bsp\bsp_pmu.c</FilePath>
             </File>
             <File>
+              <FileName>bsp_irq_prio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\bsp\bsp_irq_prio.c</FilePath>
+            </File>
+            <File>
               <FileName>bsp_dac.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\bsp\bsp_dac.c</FilePath>
@@ -1462,9 +1532,9 @@
           <GroupName>APP</GroupName>
           <Files>
             <File>
-              <FileName>app_sched.c</FileName>
+              <FileName>app_tasks.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\app\app_sched.c</FilePath>
+              <FilePath>.\app\app_tasks.c</FilePath>
             </File>
             <File>
               <FileName>task_key.c</FileName>
